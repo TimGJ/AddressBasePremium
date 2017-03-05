@@ -1,0 +1,5 @@
+# Git ignore file for AddressBasePremium ingest
+# 
+# Tim Greening-Jackson (tim@greening-jackson.com) 05 March 2017
+__pycache__/
+*~
