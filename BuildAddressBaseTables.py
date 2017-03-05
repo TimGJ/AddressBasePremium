@@ -81,8 +81,7 @@ def CreateObject(rt, rec):
 def CreateAddressBaseTables(patterns, rebuild = False):    
     """
     Creates the various tables to hold the AddressBase Premium data which are
-    read in from a series of CSV files, the location of which is specified in 
-    csvdir
+    read in from a series of CSV files, specified in 'patterns'
     
     patterns is a list of file names e.g. foo.csv or patterns e.g. *.csv.
     
@@ -160,5 +159,4 @@ if __name__ == '__main__':
                         args.password, args.host, args.dbname)
     engine = create_engine(connectionstring)
     Session = sessionmaker(bind=engine)
-    print(args)
     CreateAddressBaseTables(args.files, rebuild=args.overwrite)
