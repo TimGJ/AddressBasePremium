@@ -23,7 +23,7 @@ The software has been tested and runs OK on Windows and Linux with Postgresql an
 
 The software is designed to be run from the command line - e.g. under Linux.
 
-$ python3 --host myhost --username fred --password wilma --dbname abp /path/to/files/*.csv`
+`$ python3 --host myhost --username fred --password wilma --dbname abp /path/to/files/*.csv`
 
 ###Options
 
