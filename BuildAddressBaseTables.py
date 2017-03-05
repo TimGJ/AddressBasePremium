@@ -94,6 +94,7 @@ def CreateAddressBaseTables(patterns, rebuild = False):
 
     RecTypes = CreateRecordTypes()
 
+    # If applicable, drop the tables safely.
     try:
         if rebuild:
             for r in RecTypes:
@@ -103,10 +104,12 @@ def CreateAddressBaseTables(patterns, rebuild = False):
             File.__table__.drop(bind=engine, checkfirst=True)
     
         Base.metadata.create_all(engine)
+        
     except: # As we don't know what connector is being used, we don't know what error will be generated
         logger.error("Can't connect to database with {}".format(engine))
         sys.exit()
-    
+        
+    # Now glob the filenames from the list of patterns (principally for Windows installations)
     files = []
     for p in patterns:
         files += glob.glob(p)
@@ -116,8 +119,10 @@ def CreateAddressBaseTables(patterns, rebuild = False):
         Session = sessionmaker(bind=engine)
         session = Session()    
         imported =[z[0] for z in session.query(File.FileName).filter(File.SupersededBy == None).all()]
+        # Iterate through the list of files...
         for i, file in enumerate(files):
             fname = os.path.split(file)[1]
+            # Check if the name is already in our list of imports
             if fname in imported:
                 logger.info('File {} already imported. Skipping.'.format(fname))
                 continue
@@ -125,6 +130,7 @@ def CreateAddressBaseTables(patterns, rebuild = False):
             counts['Error'] = 0
             logger.info("Processing {} ({}/{})".format(fname, i+1, len(files)))
             frec=File(fname, session)
+            # Note that at the time of writing the CSVs were encoded in latin-1, rather than utf-8
             with open(file, encoding='latin-1') as f:
                 for j, row in enumerate(csv.reader(f)):
                     rt = RecTypes[row[0]]
@@ -138,7 +144,7 @@ def CreateAddressBaseTables(patterns, rebuild = False):
             records += j+1
             session.commit()
             frec.Update(counts, session)
-        logger.info("Read {} files {} records".format(i+1, records))
+        logger.info("Read {} files {:,} records".format(i+1, records))
         session.close()
     else:
         logger.warning('Cant find any files')
