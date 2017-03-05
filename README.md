@@ -19,6 +19,8 @@ Python3 scripts which ingest the OS _AddressBase Premium_ data from CSV. They do
 
 The software has been tested and runs OK on Windows and Linux with Postgresql and MySQL back-ends.
 
+It assumes that a suitable database has been created and that the appopriate credential are presented for a user with the privileges to create, modify and drop tables. 
+
 ##Running the software
 
 The software is designed to be run from the command line - e.g. under Linux.
@@ -31,7 +33,7 @@ The software is designed to be run from the command line - e.g. under Linux.
 
 `--username`: Database user name
 
-`--password`: Password to connect to database
+`--password`: Password to connect to database. (The system prompts if the `--password` option is not specified on the command line).
 
 `--dbname`: Name of the database (has to have been created already)
 

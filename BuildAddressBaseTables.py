@@ -8,6 +8,7 @@ import glob
 import argparse
 import sys
 import logging
+import getpass
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, 
                     format='%(asctime)s %(levelname)s %(message)s')
@@ -60,7 +61,7 @@ def CreateObject(rt, rec):
     go through the fields in the record and allocate each to the appropriate
     attribute.
     
-    rt: RecordType
+    rt:  RecordType
     rec: The record itself
     """
     try:
@@ -90,15 +91,21 @@ def CreateAddressBaseTables(patterns, rebuild = False):
     
     The rebuild flag causes all the tables to be rebuilt from sratch
     """
-    RecTypes = CreateRecordTypes()
-    if rebuild:
-        for r in RecTypes:
-            logger.info("Dropping {} table".format(RecTypes[r].name))
-            RecTypes[r].mapping.__table__.drop(bind=engine, checkfirst=True)
-        logger.info("Dropping File table")
-        File.__table__.drop(bind=engine, checkfirst=True)
 
-    Base.metadata.create_all(engine)
+    RecTypes = CreateRecordTypes()
+
+    try:
+        if rebuild:
+            for r in RecTypes:
+                logger.info("Dropping {} table".format(RecTypes[r].name))
+                RecTypes[r].mapping.__table__.drop(bind=engine, checkfirst=True)
+            logger.info("Dropping File table")
+            File.__table__.drop(bind=engine, checkfirst=True)
+    
+        Base.metadata.create_all(engine)
+    except: # As we don't know what connector is being used, we don't know what error will be generated
+        logger.error("Can't connect to database with {}".format(engine))
+        sys.exit()
     
     files = []
     for p in patterns:
@@ -139,14 +146,12 @@ def CreateAddressBaseTables(patterns, rebuild = False):
 
 if __name__ == '__main__':
 
+    # Parse the command line arguments
     parser = argparse.ArgumentParser('Ingest ABP files')
     parser.add_argument("files",        help='CSV files to read', nargs = '+')
-    parser.add_argument('--host',       help='Database hostname or IP address',
-                        default = '10.0.1.251')
-    parser.add_argument('--password',   help='Database password',
-                        default = 'wintermute')
-    parser.add_argument('--username',   help='Database user name',
-                        default = 'tim')
+    parser.add_argument('--host',       help='Database hostname or IP address')
+    parser.add_argument('--password',   help='Database password')
+    parser.add_argument('--username',   help='Database user name')
     parser.add_argument('--dbname',     help='Database name',
                         default='addressbasepremium')
     parser.add_argument('--connector',  help='SQLAlchemy Connector',
@@ -155,8 +160,20 @@ if __name__ == '__main__':
                         action = "store_true",)
     args = parser.parse_args()
 
+    # If we haven't got any credentials then abort
+    if not all([args.host, args.dbname, args.username]):
+        logger.error('Requires database credentials. See --help option for details.')
+        sys.exit()
+
+    # If we've not been given a password on the command line prompt for one
+    if not args.password:
+        args.password = getpass.getpass()
+        
+    # Setup the database connection        
     connectionstring = '{}://{}:{}@{}/{}'.format(args.connector, args.username, 
                         args.password, args.host, args.dbname)
     engine = create_engine(connectionstring)
     Session = sessionmaker(bind=engine)
+    
+    # Create the tables
     CreateAddressBaseTables(args.files, rebuild=args.overwrite)
