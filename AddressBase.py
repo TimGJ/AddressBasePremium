@@ -50,7 +50,7 @@ class File(Base):
     MaxFileNameLength      = 80
     id                     = Column(Integer, primary_key=True)
     FileName               = Column(String(MaxFileNameLength))
-    CreateStart            = Column(DateTime, default=datetime.datetime.utcnow)
+    CreateStart            = Column(DateTime, default=datetime.datetime.now)
     CreateEnd              = Column(DateTime)
     SupersededBy           = Column(Integer)
     Errors                 = Column(Integer)

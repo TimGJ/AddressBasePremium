@@ -157,11 +157,12 @@ if __name__ == '__main__':
     parser.add_argument("files",        help='CSV files to read', nargs = '+')
     parser.add_argument('--host',       help='Database hostname or IP address')
     parser.add_argument('--password',   help='Database password')
-    parser.add_argument('--username',   help='Database user name')
-    parser.add_argument('--dbname',     help='Database name',
+    parser.add_argument('--username',     help='User name',
                         default='addressbasepremium')
+    parser.add_argument('--dbname',     help='Datebase name',
+                        default='addresses')
     parser.add_argument('--connector',  help='SQLAlchemy Connector',
-                        default = 'postgresql')
+                        default = 'mysql+mysqlconnector')
     parser.add_argument('--overwrite',  help='Overwrite existing database', 
                         action = "store_true",)
     args = parser.parse_args()
